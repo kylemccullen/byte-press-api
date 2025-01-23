@@ -4,6 +4,7 @@ namespace API.Core.Interfaces;
 
 public interface ITaskService
 {
-    Task<List<BytePress.Shared.Data.Domain.Task>> GetAsync();
+    Task<List<TaskDto>> GetAsync();
     Task<TaskDto> AddAsync(AddTaskDto taskDto);
+    Task<TaskDto> UpdateAsync(int id, UpdateTaskDto taskDto);
 }

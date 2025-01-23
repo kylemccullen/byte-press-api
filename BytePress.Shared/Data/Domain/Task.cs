@@ -1,13 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace BytePress.Shared.Data.Domain;
 
-namespace BytePress.Shared.Data.Domain;
-
-public class Task
+public class Task : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
+    public string UserId { get; set; }
 
     public string Name { get; set; }
 
     public bool IsCompleted { get; set; }
+
+    public ApplicationUser User { get; set; }
 }

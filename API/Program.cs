@@ -1,10 +1,8 @@
-using API.Core.DTO;
-using API.Core.Interfaces;
-using API.Core.Services;
 using API.Extensions;
 using BytePress.Shared.Classes;
 using BytePress.Shared.Configuration;
 using BytePress.Shared.Data;
+using BytePress.Shared.Data.Domain;
 using Merchants.API.Extensions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +23,7 @@ builder.Services.AddDbContext<BytePressContext>(options =>
         sqlServerOptionsAction => { sqlServerOptionsAction.EnableRetryOnFailure(); });
 });
 
-builder.Services.AddScoped<ITaskService, TaskService>();
-builder.Services.AddAutoMapper(typeof(BytePressProfile));
+builder.ConfigureServices();
 
 builder.Services.AddControllers(options =>
 {
@@ -36,7 +33,15 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddEntityFrameworkStores<BytePressContext>();
+
 var app = builder.Build();
+
+app.UseMiddleware<UnauthorizedAccessExceptionMiddleware>();
+
+app.MapIdentityApi<ApplicationUser>();
 
 if (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost))
 {

@@ -1,4 +1,6 @@
-﻿namespace API.Core.DTO.Task;
+﻿using API.Core.DTO.User;
+
+namespace API.Core.DTO.Task;
 
 public class TaskDto
 {
@@ -7,4 +9,6 @@ public class TaskDto
     public string Name { get; set; }
 
     public bool IsCompleted { get; set; }
+
+    public BaseUserDto User { get; set; }
 }
