@@ -20,9 +20,10 @@ public class TaskService : ITaskService
         _mapper = mapper;
     }
 
-    public async Task<List<TaskDto>> GetAsync()
+    public async Task<List<TaskDto>> GetAsync(string userId)
     {
         return await _context.Task
+            .Where(t => t.UserId == userId)
             .ProjectTo<TaskDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -54,5 +55,11 @@ public class TaskService : ITaskService
         await _context.SaveChangesAsync();
 
         return _mapper.Map<TaskDto>(task);
+    }
+
+    public async Task<int> GetCompletedCountAsync()
+    {
+        return await _context.Task
+            .CountAsync(t => t.IsCompleted == true);
     }
 }

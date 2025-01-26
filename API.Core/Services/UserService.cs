@@ -1,4 +1,5 @@
 ﻿using API.Core.Interfaces;
+using BytePress.Shared.Classes;
 using BytePress.Shared.Data.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -31,8 +32,7 @@ public class UserService : IUserService
 
     public bool IsValidUser(string entityUserId)
     {
-        var loggedInUserId = _httpContextAccessor.HttpContext.User.Claims
-            .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        var loggedInUserId = _httpContextAccessor.HttpContext.User.GetUserId();
 
         return loggedInUserId != null && loggedInUserId == entityUserId;
     }

@@ -23,6 +23,18 @@ builder.Services.AddDbContext<BytePressContext>(options =>
         sqlServerOptionsAction => { sqlServerOptionsAction.EnableRetryOnFailure(); });
 });
 
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("AllowOrigin",
+		configurePolicy =>
+		{
+			configurePolicy
+				.AllowAnyOrigin()
+				.AllowAnyHeader()
+				.AllowAnyMethod();
+		});
+});
+
 builder.ConfigureServices();
 
 builder.Services.AddControllers(options =>
@@ -50,6 +62,8 @@ if (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost))
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowOrigin");
 
 app.UseHttpsRedirection();
 

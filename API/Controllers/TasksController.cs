@@ -1,5 +1,6 @@
 ﻿using API.Core.DTO.Task;
 using API.Core.Interfaces;
+using BytePress.Shared.Classes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,7 +20,9 @@ public class TasksController : Controller
     [HttpGet]
     public async Task<ActionResult<List<TaskDto>>> GetAsync()
     {
-        var result = await _taskService.GetAsync();
+        var userId = User.GetUserId();
+
+        var result = await _taskService.GetAsync(userId);
 
         return Ok(result);
     }
@@ -40,4 +43,12 @@ public class TasksController : Controller
         return Ok(result);
     }
 
+    [AllowAnonymous]
+    [HttpGet("completed/count")]
+    public async Task<ActionResult<int>> GetCompletedTaskCountAsync()
+    {
+        var result = await _taskService.GetCompletedCountAsync();
+
+        return Ok(result);
+    }
 }
