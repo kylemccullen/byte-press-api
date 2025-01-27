@@ -1,12 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using BytePress.Shared.Classes;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -84,10 +86,14 @@ namespace EasyAuth.Overrides
                         return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidEmail(email)));
                     }
 
+                    var roleName = (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost) && !await userManager.Users.AnyAsync()) ? Roles.Admin : Roles.Client;
+
                     var user = new TUser();
                     await userStore.SetUserNameAsync(user, email, CancellationToken.None);
                     await emailStore.SetEmailAsync(user, email, CancellationToken.None);
                     var result = await userManager.CreateAsync(user, registration.Password);
+
+                    await userManager.AddToRoleAsync(user, roleName);
 
                     if (!result.Succeeded)
                     {
