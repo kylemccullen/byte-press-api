@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Merchants.API.Extensions;
+namespace API.Extensions;
 
 public partial class SlugifyParameterTransformer : IOutboundParameterTransformer
 {

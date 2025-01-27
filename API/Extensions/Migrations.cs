@@ -1,4 +1,6 @@
-﻿using BytePress.Shared.Data;
+﻿using BytePress.Shared.Classes;
+using BytePress.Shared.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions;
@@ -11,5 +13,19 @@ public static class Migrations
         var context = scope.ServiceProvider.GetRequiredService<BytePressContext>();
 
         await context.Database.MigrateAsync();
+    }
+
+    public static async Task SeedRolesAsync(this WebApplication app)
+    {
+        var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        foreach (var roleName in Roles.List.Select(r => r.Name))
+        {
+            if (await roleManager.RoleExistsAsync(roleName))
+                continue;
+
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
     }
 }

@@ -3,7 +3,8 @@ using BytePress.Shared.Classes;
 using BytePress.Shared.Configuration;
 using BytePress.Shared.Data;
 using BytePress.Shared.Data.Domain;
-using Merchants.API.Extensions;
+using EasyAuth.Overrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,14 +26,14 @@ builder.Services.AddDbContext<BytePressContext>(options =>
 
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy("AllowOrigin",
-		configurePolicy =>
-		{
-			configurePolicy
-				.AllowAnyOrigin()
-				.AllowAnyHeader()
-				.AllowAnyMethod();
-		});
+    options.AddPolicy("AllowOrigin",
+        configurePolicy =>
+        {
+            configurePolicy
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
 });
 
 builder.ConfigureServices();
@@ -46,18 +47,22 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAuthorization();
+
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddRoles<IdentityRole>()
+    .AddRoleManager<RoleManager<IdentityRole>>()
     .AddEntityFrameworkStores<BytePressContext>();
 
 var app = builder.Build();
 
 app.UseMiddleware<UnauthorizedAccessExceptionMiddleware>();
 
-app.MapIdentityApi<ApplicationUser>();
+app.MapIdentityApiFilterable<ApplicationUser>(new IdentityApiEndpointRouteBuilderOptions());
 
 if (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost))
 {
     await app.MigrateAsync();
+    await app.SeedRolesAsync();
 
     app.UseSwagger();
     app.UseSwaggerUI();
