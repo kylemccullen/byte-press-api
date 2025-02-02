@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using API.Core.DTO.User;
 using BytePress.Shared.Classes;
+using BytePress.Shared.Data.Domain;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
@@ -41,21 +43,19 @@ namespace EasyAuth.Overrides
         /// <summary>
         /// Add endpoints for registering, logging in, and logging out using ASP.NET Core Identity.
         /// </summary>
-        /// <typeparam name="TUser">The type describing the user. This should match the generic parameter in <see cref="UserManager{TUser}"/>.</typeparam>
         /// <param name="endpoints">
         /// The <see cref="IEndpointRouteBuilder"/> to add the identity endpoints to.
         /// Call <see cref="EndpointRouteBuilderExtensions.MapGroup(IEndpointRouteBuilder, string)"/> to add a prefix to all the endpoints.
         /// </param>
         /// <returns>An <see cref="IEndpointConventionBuilder"/> to further customize the added endpoints.</returns>
-        public static IEndpointConventionBuilder MapIdentityApiFilterable<TUser>(this IEndpointRouteBuilder endpoints,
+        public static IEndpointConventionBuilder MapIdentityApiFilterable(this IEndpointRouteBuilder endpoints,
             IdentityApiEndpointRouteBuilderOptions configureOptions)
-            where TUser : class, new()
         {
             ArgumentNullException.ThrowIfNull(endpoints);
 
             var timeProvider = endpoints.ServiceProvider.GetRequiredService<TimeProvider>();
             var bearerTokenOptions = endpoints.ServiceProvider.GetRequiredService<IOptionsMonitor<BearerTokenOptions>>();
-            var emailSender = endpoints.ServiceProvider.GetRequiredService<IEmailSender<TUser>>();
+            var emailSender = endpoints.ServiceProvider.GetRequiredService<IEmailSender<ApplicationUser>>();
             var linkGenerator = endpoints.ServiceProvider.GetRequiredService<LinkGenerator>();
 
             // We'll figure out a unique endpoint name based on the final route pattern during endpoint generation.
@@ -65,20 +65,20 @@ namespace EasyAuth.Overrides
 
             if (!configureOptions.ExcludeRegisterPost)
             {
-                // NOTE: We cannot inject UserManager<TUser> directly because the TUser generic parameter is currently unsupported by RDG.
+                // NOTE: We cannot inject UserManager<ApplicationUser> directly because the ApplicationUser generic parameter is currently unsupported by RDG.
                 // https://github.com/dotnet/aspnetcore/issues/47338
                 routeGroup.MapPost("/register", async Task<Results<Ok, ValidationProblem>>
-                    ([FromBody] RegisterRequest registration, HttpContext context, [FromServices] IServiceProvider sp) =>
+                    ([FromBody] RegisterDto registration, HttpContext context, [FromServices] IServiceProvider sp) =>
                 {
-                    var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                    var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
                     if (!userManager.SupportsUserEmail)
                     {
                         throw new NotSupportedException($"{nameof(MapIdentityApiFilterable)} requires a user store with email support.");
                     }
 
-                    var userStore = sp.GetRequiredService<IUserStore<TUser>>();
-                    var emailStore = (IUserEmailStore<TUser>)userStore;
+                    var userStore = sp.GetRequiredService<IUserStore<ApplicationUser>>();
+                    var emailStore = (IUserEmailStore<ApplicationUser>)userStore;
                     var email = registration.Email;
 
                     if (string.IsNullOrEmpty(email) || !_emailAddressAttribute.IsValid(email))
@@ -88,7 +88,10 @@ namespace EasyAuth.Overrides
 
                     var roleName = (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost) && !await userManager.Users.AnyAsync()) ? Roles.Admin : Roles.Client;
 
-                    var user = new TUser();
+                    var user = new ApplicationUser()
+                    {
+                        Name = registration.Name
+                    };
                     await userStore.SetUserNameAsync(user, email, CancellationToken.None);
                     await emailStore.SetEmailAsync(user, email, CancellationToken.None);
                     var result = await userManager.CreateAsync(user, registration.Password);
@@ -110,7 +113,7 @@ namespace EasyAuth.Overrides
                 routeGroup.MapPost("/login", async Task<Results<Ok<AccessTokenResponse>, EmptyHttpResult, ProblemHttpResult>>
                 ([FromBody] LoginRequest login, [FromQuery] bool? useCookies, [FromQuery] bool? useSessionCookies, [FromServices] IServiceProvider sp) =>
             {
-                var signInManager = sp.GetRequiredService<SignInManager<TUser>>();
+                var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
 
                 var useCookieScheme = (useCookies == true) || (useSessionCookies == true);
                 var isPersistent = (useCookies == true) && (useSessionCookies != true);
@@ -145,14 +148,14 @@ namespace EasyAuth.Overrides
                 routeGroup.MapPost("/refresh", async Task<Results<Ok<AccessTokenResponse>, UnauthorizedHttpResult, SignInHttpResult, ChallengeHttpResult>>
                 ([FromBody] RefreshRequest refreshRequest, [FromServices] IServiceProvider sp) =>
             {
-                var signInManager = sp.GetRequiredService<SignInManager<TUser>>();
+                var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
                 var refreshTokenProtector = bearerTokenOptions.Get(IdentityConstants.BearerScheme).RefreshTokenProtector;
                 var refreshTicket = refreshTokenProtector.Unprotect(refreshRequest.RefreshToken);
 
                 // Reject the /refresh attempt with a 401 if the token expired or the security stamp validation fails
                 if (refreshTicket?.Properties?.ExpiresUtc is not { } expiresUtc ||
                     timeProvider.GetUtcNow() >= expiresUtc ||
-                    await signInManager.ValidateSecurityStampAsync(refreshTicket.Principal) is not TUser user)
+                    await signInManager.ValidateSecurityStampAsync(refreshTicket.Principal) is not ApplicationUser user)
 
                 {
                     return TypedResults.Challenge();
@@ -168,7 +171,7 @@ namespace EasyAuth.Overrides
                 routeGroup.MapGet("/confirmEmail", async Task<Results<ContentHttpResult, UnauthorizedHttpResult>>
                 ([FromQuery] string userId, [FromQuery] string code, [FromQuery] string? changedEmail, [FromServices] IServiceProvider sp) =>
             {
-                var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
                 if (await userManager.FindByIdAsync(userId) is not { } user)
                 {
                     // We could respond with a 404 instead of a 401 like Identity UI, but that feels like unnecessary information.
@@ -222,7 +225,7 @@ namespace EasyAuth.Overrides
                 routeGroup.MapPost("/resendConfirmationEmail", async Task<Ok>
                 ([FromBody] ResendConfirmationEmailRequest resendRequest, HttpContext context, [FromServices] IServiceProvider sp) =>
             {
-                var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
                 if (await userManager.FindByEmailAsync(resendRequest.Email) is not { } user)
                 {
                     return TypedResults.Ok();
@@ -238,7 +241,7 @@ namespace EasyAuth.Overrides
                 routeGroup.MapPost("/forgotPassword", async Task<Results<Ok, ValidationProblem>>
                 ([FromBody] ForgotPasswordRequest resetRequest, [FromServices] IServiceProvider sp) =>
             {
-                var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
                 var user = await userManager.FindByEmailAsync(resetRequest.Email);
 
                 if (user is not null && await userManager.IsEmailConfirmedAsync(user))
@@ -260,7 +263,7 @@ namespace EasyAuth.Overrides
                 routeGroup.MapPost("/resetPassword", async Task<Results<Ok, ValidationProblem>>
                 ([FromBody] ResetPasswordRequest resetRequest, [FromServices] IServiceProvider sp) =>
             {
-                var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
                 var user = await userManager.FindByEmailAsync(resetRequest.Email);
 
@@ -300,7 +303,7 @@ namespace EasyAuth.Overrides
                     accountGroup.MapPost("/2fa", async Task<Results<Ok<TwoFactorResponse>, ValidationProblem, NotFound>>
                     (ClaimsPrincipal claimsPrincipal, [FromBody] TwoFactorRequest tfaRequest, [FromServices] IServiceProvider sp) =>
                 {
-                    var signInManager = sp.GetRequiredService<SignInManager<TUser>>();
+                    var signInManager = sp.GetRequiredService<SignInManager<ApplicationUser>>();
                     var userManager = signInManager.UserManager;
                     if (await userManager.GetUserAsync(claimsPrincipal) is not { } user)
                     {
@@ -378,7 +381,7 @@ namespace EasyAuth.Overrides
                     accountGroup.MapGet("/info", async Task<Results<Ok<InfoResponse>, ValidationProblem, NotFound>>
                     (ClaimsPrincipal claimsPrincipal, [FromServices] IServiceProvider sp) =>
                 {
-                    var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                    var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
                     if (await userManager.GetUserAsync(claimsPrincipal) is not { } user)
                     {
                         return TypedResults.NotFound();
@@ -393,7 +396,7 @@ namespace EasyAuth.Overrides
                     accountGroup.MapPost("/info", async Task<Results<Ok<InfoResponse>, ValidationProblem, NotFound>>
                     (ClaimsPrincipal claimsPrincipal, [FromBody] InfoRequest infoRequest, HttpContext context, [FromServices] IServiceProvider sp) =>
                 {
-                    var userManager = sp.GetRequiredService<UserManager<TUser>>();
+                    var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
                     if (await userManager.GetUserAsync(claimsPrincipal) is not { } user)
                     {
                         return TypedResults.NotFound();
@@ -434,7 +437,7 @@ namespace EasyAuth.Overrides
                 }
             }
 
-            async Task SendConfirmationEmailAsync(TUser user, UserManager<TUser> userManager, HttpContext context, string email, bool isChange = false)
+            async System.Threading.Tasks.Task SendConfirmationEmailAsync(ApplicationUser user, UserManager<ApplicationUser> userManager, HttpContext context, string email, bool isChange = false)
             {
                 if (confirmEmailEndpointName is null)
                 {
@@ -501,8 +504,8 @@ namespace EasyAuth.Overrides
             return TypedResults.ValidationProblem(errorDictionary);
         }
 
-        private static async Task<InfoResponse> CreateInfoResponseAsync<TUser>(TUser user, UserManager<TUser> userManager)
-            where TUser : class
+        private static async Task<InfoResponse> CreateInfoResponseAsync<ApplicationUser>(ApplicationUser user, UserManager<ApplicationUser> userManager)
+            where ApplicationUser : class
         {
             return new()
             {

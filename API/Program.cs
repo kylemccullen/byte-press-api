@@ -57,7 +57,7 @@ var app = builder.Build();
 
 app.UseMiddleware<UnauthorizedAccessExceptionMiddleware>();
 
-app.MapIdentityApiFilterable<ApplicationUser>(new IdentityApiEndpointRouteBuilderOptions());
+app.MapIdentityApiFilterable(new IdentityApiEndpointRouteBuilderOptions());
 
 if (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost))
 {
