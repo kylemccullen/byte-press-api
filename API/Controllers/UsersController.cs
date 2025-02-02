@@ -28,4 +28,12 @@ public class UsersController : Controller
 
         return Ok(result);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<BaseUserDto>> UpdateAsync(string id, [FromBody] UpdateUserDto updateUserDto)
+    {
+        var result = await _userService.UpdateAsync(id, updateUserDto);
+
+        return Ok(result);
+    }
 }
