@@ -2,7 +2,7 @@
 using BytePress.Shared.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ApplicationRole = BytePress.Shared.Data.Domain.ApplicationRole;
+using ApplicationRole = BytePress.Shared.Data.Domain.Identity.ApplicationRole;
 
 namespace API.Extensions;
 

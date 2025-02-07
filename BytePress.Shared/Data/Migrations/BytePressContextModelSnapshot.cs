@@ -22,7 +22,7 @@ namespace BytePress.Shared.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationRole", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationRole", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -49,7 +49,7 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationRoleClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,7 +74,7 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUser", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -142,7 +142,7 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserClaim", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserClaim", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -167,7 +167,7 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserLogin", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserLogin", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -189,7 +189,7 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserRole", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserRole", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -204,7 +204,7 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserToken", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserToken", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -259,18 +259,18 @@ namespace BytePress.Shared.Data.Migrations
                     b.ToTable("Task");
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationRoleClaim", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationRoleClaim", b =>
                 {
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationRole", null)
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserClaim", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserClaim", b =>
                 {
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationUser", "User")
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationUser", "User")
                         .WithMany("UserClaims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -279,24 +279,24 @@ namespace BytePress.Shared.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserLogin", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserLogin", b =>
                 {
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationUser", null)
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserRole", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserRole", b =>
                 {
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationRole", "Role")
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationRole", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationUser", "User")
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationUser", "User")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -307,9 +307,9 @@ namespace BytePress.Shared.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUserToken", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUserToken", b =>
                 {
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationUser", null)
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -318,19 +318,19 @@ namespace BytePress.Shared.Data.Migrations
 
             modelBuilder.Entity("BytePress.Shared.Data.Domain.Task", b =>
                 {
-                    b.HasOne("BytePress.Shared.Data.Domain.ApplicationUser", "User")
+                    b.HasOne("BytePress.Shared.Data.Domain.Identity.ApplicationUser", "User")
                         .WithMany("Tasks")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationRole", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationRole", b =>
                 {
                     b.Navigation("UserRoles");
                 });
 
-            modelBuilder.Entity("BytePress.Shared.Data.Domain.ApplicationUser", b =>
+            modelBuilder.Entity("BytePress.Shared.Data.Domain.Identity.ApplicationUser", b =>
                 {
                     b.Navigation("Tasks");
 

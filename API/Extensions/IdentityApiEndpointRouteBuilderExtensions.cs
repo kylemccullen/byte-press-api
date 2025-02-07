@@ -3,7 +3,7 @@
 
 using API.Core.DTO.User;
 using BytePress.Shared.Classes;
-using BytePress.Shared.Data.Domain;
+using BytePress.Shared.Data.Domain.Identity;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;

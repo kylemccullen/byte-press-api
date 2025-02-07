@@ -1,4 +1,4 @@
-﻿using BytePress.Shared.Data.Domain;
+﻿using BytePress.Shared.Data.Domain.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

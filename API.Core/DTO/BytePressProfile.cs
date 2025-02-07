@@ -1,7 +1,7 @@
 ﻿using API.Core.DTO.Task;
 using API.Core.DTO.User;
 using AutoMapper;
-using BytePress.Shared.Data.Domain;
+using BytePress.Shared.Data.Domain.Identity;
 
 namespace API.Core.DTO;
 

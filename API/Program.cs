@@ -2,7 +2,7 @@ using API.Extensions;
 using BytePress.Shared.Classes;
 using BytePress.Shared.Configuration;
 using BytePress.Shared.Data;
-using BytePress.Shared.Data.Domain;
+using BytePress.Shared.Data.Domain.Identity;
 using EasyAuth.Overrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;

@@ -1,4 +1,6 @@
-﻿namespace BytePress.Shared.Data.Domain;
+﻿using BytePress.Shared.Data.Domain.Identity;
+
+namespace BytePress.Shared.Data.Domain;
 
 public class Task : BaseEntity
 {

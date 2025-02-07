@@ -6,5 +6,8 @@ run:
 expo:
 	dotnet run --project=API -- --urls "http://0.0.0.0:$(PORT)"
 
+w-expo:
+	dotnet watch run --project=API --urls "http://0.0.0.0:$(PORT)"
+
 t:
 	ngrok http $(PORT)

@@ -1,5 +1,5 @@
 ﻿using API.Core.DTO.User;
-using BytePress.Shared.Data.Domain;
+using BytePress.Shared.Data.Domain.Identity;
 
 namespace API.Core.Interfaces;
 
