@@ -86,7 +86,7 @@ namespace EasyAuth.Overrides
                         return CreateValidationProblem(IdentityResult.Failed(userManager.ErrorDescriber.InvalidEmail(email)));
                     }
 
-                    var roleName = (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost) && !await userManager.Users.AnyAsync()) ? Roles.Admin : Roles.Client;
+                    var roleName = (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost) && !await userManager.Users.AnyAsync()) ? Roles.Admin : Roles.User;
 
                     var user = new ApplicationUser()
                     {

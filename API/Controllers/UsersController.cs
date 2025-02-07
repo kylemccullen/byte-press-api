@@ -22,9 +22,7 @@ public class UsersController : Controller
     [HttpGet]
     public async Task<ActionResult<BaseUserDto>> GetAsync()
     {
-        var user = await _userService.GetCurrentUserAsync();
-
-        var result = _mapper.Map<BaseUserDto>(user);
+        var result = await _userService.GetLoggedInUserWithRoleAsync();
 
         return Ok(result);
     }
@@ -33,6 +31,15 @@ public class UsersController : Controller
     public async Task<ActionResult<BaseUserDto>> UpdateAsync(string id, [FromBody] UpdateUserDto updateUserDto)
     {
         var result = await _userService.UpdateAsync(id, updateUserDto);
+
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("overview")]
+    public async Task<ActionResult<List<UserOverviewDto>>> GetOverviewsAsync()
+    {
+        var result = await _userService.GetOverviewsAsync();
 
         return Ok(result);
     }

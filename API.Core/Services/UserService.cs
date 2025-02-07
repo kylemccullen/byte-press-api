@@ -1,7 +1,9 @@
 ﻿using API.Core.DTO.User;
 using API.Core.Interfaces;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using BytePress.Shared.Classes;
+using BytePress.Shared.Data;
 using BytePress.Shared.Data.Domain;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -13,16 +15,18 @@ public class UserService : IUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly BytePressContext _context;
     private readonly IMapper _mapper;
 
-    public UserService(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, IMapper mapper)
+    public UserService(IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager, IMapper mapper, BytePressContext context)
     {
         _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
         _mapper = mapper;
+        _context = context;
     }
 
-    public async Task<ApplicationUser> GetCurrentUserAsync()
+    public async Task<ApplicationUser> GetLoggedInUserAsync()
     {
         var name = _httpContextAccessor.HttpContext?.User?.Identity.Name;
 
@@ -30,7 +34,20 @@ public class UserService : IUserService
             return null;
 
         return await _userManager.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Email == name);
+    }
+
+    public async Task<BaseUserDto> GetLoggedInUserWithRoleAsync()
+    {
+        var email = _httpContextAccessor.HttpContext?.User?.Identity.Name;
+
+        return await _context.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .ProjectTo<BaseUserDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public bool IsValidUser(string userId)
@@ -42,7 +59,7 @@ public class UserService : IUserService
 
     public async Task<BaseUserDto> UpdateAsync(string id, UpdateUserDto updateUserDto)
     {
-        var user = await GetCurrentUserAsync();
+        var user = await GetLoggedInUserAsync();
 
         if (!IsValidUser(id))
             throw new UnauthorizedAccessException();
@@ -55,5 +72,13 @@ public class UserService : IUserService
         await _userManager.UpdateAsync(user);
 
         return _mapper.Map<BaseUserDto>(user);
+    }
+
+    public async Task<List<UserOverviewDto>> GetOverviewsAsync()
+    {
+        return await _context.Users
+            .Include(u => u.Tasks)
+            .ProjectTo<UserOverviewDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }

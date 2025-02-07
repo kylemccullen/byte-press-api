@@ -32,7 +32,7 @@ public class TaskService : ITaskService
     {
         var task = _mapper.Map<BytePress.Shared.Data.Domain.Task>(taskDto);
 
-        task.User = await _userService.GetCurrentUserAsync();
+        task.User = await _userService.GetLoggedInUserAsync();
 
         await _context.Task.AddAsync(task);
         await _context.SaveChangesAsync();

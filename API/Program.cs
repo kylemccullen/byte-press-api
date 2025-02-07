@@ -49,8 +49,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
-    .AddRoles<IdentityRole>()
-    .AddRoleManager<RoleManager<IdentityRole>>()
+    .AddRoles<ApplicationRole>()
+    .AddRoleManager<RoleManager<ApplicationRole>>()
     .AddEntityFrameworkStores<BytePressContext>();
 
 var app = builder.Build();

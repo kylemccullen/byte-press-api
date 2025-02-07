@@ -1,4 +1,6 @@
-﻿namespace API.Core.DTO.User;
+﻿using BytePress.Shared.Classes;
+
+namespace API.Core.DTO.User;
 
 public class BaseUserDto
 {
@@ -7,4 +9,6 @@ public class BaseUserDto
     public string Email { get; set; }
 
     public string Name { get; set; }
+
+    public string Role { get; set; }
 }

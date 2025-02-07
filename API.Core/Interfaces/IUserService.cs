@@ -5,7 +5,9 @@ namespace API.Core.Interfaces;
 
 public interface IUserService
 {
-    Task<ApplicationUser> GetCurrentUserAsync();
+    Task<ApplicationUser> GetLoggedInUserAsync();
+    Task<BaseUserDto> GetLoggedInUserWithRoleAsync();
     bool IsValidUser(string userId);
     Task<BaseUserDto> UpdateAsync(string id, UpdateUserDto updateUserDto);
+    Task<List<UserOverviewDto>> GetOverviewsAsync();
 }
