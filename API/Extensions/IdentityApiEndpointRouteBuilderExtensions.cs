@@ -88,10 +88,13 @@ namespace EasyAuth.Overrides
 
                     var roleName = (EnvironmentHelper.IsEnvironment(AppEnvironments.Localhost) && !await userManager.Users.AnyAsync()) ? Roles.Admin : Roles.User;
 
-                    var user = new ApplicationUser()
+                    var user = new ApplicationUser();
+
+                    if (!string.IsNullOrEmpty(registration.Name))
                     {
-                        Name = registration.Name
-                    };
+                        user.Name = registration.Name;
+                    }
+
                     await userStore.SetUserNameAsync(user, email, CancellationToken.None);
                     await emailStore.SetEmailAsync(user, email, CancellationToken.None);
                     var result = await userManager.CreateAsync(user, registration.Password);
