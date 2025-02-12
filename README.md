@@ -21,3 +21,17 @@ Backend todo app API with auth.
 3. Access swagger
     - Standalone `https://localhost:7002/swagger/index.html`
     - With Expo `https://<random-url-key>.ngrok-free.app/swagger/index.html`
+4. Setting up Email Provider (Mailhog)
+    - appsettings.Localhost.json is configured to work with Mailhog running locally.
+    - Install Mailhog from https://github.com/mailhog/MailHog
+    - Enable email sending in BytePress.Shared project user-secrets
+      ```json
+      {
+        "AppSettings": {
+          "EmailSettings": {
+            "IsEnabled": true
+          }
+        }
+      }
+      ```
+    - View emails at http://localhost:8025/

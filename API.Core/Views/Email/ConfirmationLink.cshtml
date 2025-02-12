@@ -1,0 +1,14 @@
+@model API.Core.Models.Email.ConfirmationLinkViewModel
+
+@{
+    Layout = "API.Core.Views.Email._Layout";
+}
+
+<h5 class="card-title text-center">Email Confirmation</h5>
+<p class="card-text">Hello,</p>
+<p class="card-text">Thank you for registering with us! To confirm your email address, please click the button below:</p>
+<div class="text-center">
+    <a href="@Model.ConfirmationLink" target="_blank" class="btn btn-primary btn-lg">Confirm Email</a>
+</div>
+<p class="card-text mt-3">If you did not register for this account, please ignore this email.</p>
+<p class="text-muted text-center">Best regards, <br> @Model.CompanyName</p>
